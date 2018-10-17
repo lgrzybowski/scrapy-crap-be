@@ -10,7 +10,7 @@ const text = require('./../src/helpers/text');
 
     try {
         console.log(`!!! STARTING CRAWLING PAGE ${name}`);
-        await page.goto(pageURL);
+        await page.goto(pageURL, { timeout: 120000 });
         await page.waitForSelector('#najnowsze-info');
         let news = await page.evaluate(() => {
             let newsResults = [];
@@ -29,7 +29,7 @@ const text = require('./../src/helpers/text');
         };
 
         for (let i = 0; i < news.length - 1; i++) {
-            await page.goto(pageURL + news[i]);
+            await page.goto(pageURL + news[i], { timeout: 120000 });
             results.news.push({
                 id: i.toString(),
                 title: await text.singleSelectorReadText(page, '#articleModule h1'),
