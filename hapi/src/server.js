@@ -11,28 +11,12 @@ const server = Hapi.server({
 
 server.route({
     method: 'GET',
-    path: '/',
+    path: '/{siteName}',
     handler: (request, h) => {
-
-        let results = fs.readdirSync('./results', 'utf8');
-        let content=[];
-
-        results.forEach((site) => {
-
-            let result = JSON.parse(fs.readFileSync(`./results/${site}`, {encoding: 'utf-8'}));
-
-            const news = result.news;
-            const noExtension = site.substring(0, site.indexOf('.'));
-
-            if (result !== undefined) {
-                content.push({site: noExtension, news});
-            }
-        });
-
-        return content;
+        let result = JSON.parse(fs.readFileSync(`./results/${request.params.siteName}.json`, {encoding: 'utf-8'}));
+        return result;
     }
 });
-
 
 const init = async () => {
 

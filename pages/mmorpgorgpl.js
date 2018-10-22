@@ -6,6 +6,18 @@ const text = require('./../src/helpers/text');
 (async () => {
     const browser = await bro.browser();
     const page = await browser.newPage();
+
+    await page.setRequestInterception(true);
+    page.on('request', interceptedRequest => {
+        if (interceptedRequest.url().endsWith('.png')
+            || interceptedRequest.url().endsWith('.jpg')
+            || interceptedRequest.url().includes('ads')
+            || interceptedRequest.url().includes('doubleclick'))
+            interceptedRequest.abort();
+        else
+            interceptedRequest.continue();
+    });
+
     const name = 'mmorpgorgpl';
 
     try {
