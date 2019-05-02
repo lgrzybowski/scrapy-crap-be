@@ -5,7 +5,7 @@ const fs = require('fs');
 const Hapi = require('hapi');
 
 const server = Hapi.server({
-    port: 8080,
+    port: process.env.PORT || 8080,
     host: '0.0.0.0'
 });
 
@@ -13,13 +13,16 @@ server.route({
     method: 'GET',
     path: '/{siteName}',
     handler: (request, h) => {
-        let result = JSON.parse(fs.readFileSync(`./results/${request.params.siteName}.json`, {encoding: 'utf-8'}));
-        return result;
+        const filePath = `./results/${request.params.siteName}.json`;
+
+        if (fs.existsSync(filePath)) {
+            return JSON.parse(fs.readFileSync(filePath, {encoding: 'utf-8'}));
+        }
+        return null;
     }
 });
 
 const init = async () => {
-
     await server.start();
     console.log(`Server running at: ${server.info.uri}`);
 };

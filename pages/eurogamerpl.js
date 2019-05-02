@@ -7,7 +7,7 @@ const text = require('./../src/helpers/text');
     const browser = await bro.browser();
     const page = await browser.newPage();
 
-    const name = 'eurogamer';
+    const name = 'eurogamerpl';
 
     try {
         console.log(`!!! STARTING CRAWLING PAGE ${name}`);
