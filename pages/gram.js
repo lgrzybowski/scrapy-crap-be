@@ -11,10 +11,10 @@ const text = require('./../src/helpers/text');
     try {
         console.log(`!!! STARTING CRAWLING PAGE ${name}`);
         await page.goto(pageURL, { timeout: 120000 });
-        await page.waitForSelector('#najnowsze-info');
+        await page.waitForSelector('.news-room');
         let news = await page.evaluate(() => {
             let newsResults = [];
-            let newsOnPage = document.querySelectorAll('#najnowsze-info a');
+            let newsOnPage = document.querySelectorAll('.article a');
 
             newsOnPage.forEach(async (singleNews) => {
                 const link = await singleNews.getAttribute('href');
@@ -32,8 +32,8 @@ const text = require('./../src/helpers/text');
             await page.goto(pageURL + news[i], { timeout: 120000 });
             results.news.push({
                 id: i.toString(),
-                title: await text.singleSelectorReadText(page, '#articleModule h1'),
-                text: await text.multipleSelectorsReadText(page, '#articleModule p'),
+                title: await text.singleSelectorReadText(page, 'article h1'),
+                text: await text.multipleSelectorsReadText(page, '#content-root p'),
                 link: pageURL + news[i]
             });
         }
