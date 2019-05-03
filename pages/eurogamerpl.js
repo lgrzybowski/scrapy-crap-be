@@ -1,16 +1,15 @@
 const bro = require('../src/crawler/browser');
 const pageURL = 'https://www.eurogamer.pl';
-const save = require('./../src/helpers/save');
-const text = require('./../src/helpers/text');
+const textHelper = require('./../src/helpers/text');
+const databaseHelper = require('./../src/helpers/database');
 
 (async () => {
     const browser = await bro.browser();
     const page = await browser.newPage();
-
-    const name = 'eurogamerpl';
+    const pageName = 'eurogamerpl';
 
     try {
-        console.log(`!!! STARTING CRAWLING PAGE ${name}`);
+        console.log(`!!! STARTING CRAWLING PAGE ${pageName}`);
         await page.goto(`${pageURL}/archive/news`, {timeout: 120000});
         await page.waitForSelector('.main');
         await page.waitFor(2000);
@@ -25,31 +24,21 @@ const text = require('./../src/helpers/text');
             return newsResults;
         });
 
-        let results = {
-            news: [],
-        };
-
         await page.waitFor(10000);
 
         for (let i = 0; i < news.length - 1; i++) {
             await page.goto(`${pageURL}${news[i]}`, {timeout: 120000});
-            let title = await text.singleSelectorReadText(page, 'h1.title');
-            let articleText = await text.multipleSelectorsReadText(page, 'main section p');
-            if (text !== undefined && title !== undefined) {
-                results.news.push({
-                    id: i.toString(),
-                    title: title,
-                    text: articleText,
-                    link: pageURL + news[i]
-                });
-            }
+            let title = await textHelper.singleSelectorReadText(page, 'h1.title');
+            let text = await textHelper.multipleSelectorsReadText(page, 'main section p');
+            let link = pageURL + news[i];
+            await databaseHelper.insertNewsToDatabase(title, text, link, pageName);
         }
-        await save.saveNews(name, results);
     } catch (e) {
         console.log(e);
     }
     finally {
-        console.log(`!!! FINISHED CRAWLING PAGE ${name}`);
+        console.log(`!!! FINISHED CRAWLING PAGE ${pageName}`);
+        await databaseHelper.endPool();
         browser.close();
     }
 })();

@@ -15,7 +15,7 @@ const singleSelectorReadText = async (page, selector) => {
 
 const multipleSelectorsReadText = async (page, selectors) => {
     await page.waitFor(1000);
-    let result = await page.evaluate((selectors) => {
+    const result = await page.evaluate((selectors) => {
 
         let completeText = [];
         const elementsToRead = document.querySelectorAll(selectors);

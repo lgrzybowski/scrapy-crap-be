@@ -1,18 +1,18 @@
 const bro = require('../src/crawler/browser');
 const pageURL = 'https://www.cdaction.pl';
-const save = require('./../src/helpers/save');
-const text = require('./../src/helpers/text');
+const textHelper = require('./../src/helpers/text');
+const databaseHelper = require('./../src/helpers/database');
 
 (async () => {
     const browser = await bro.browser();
     const page = await browser.newPage();
-    const name = 'cdaction';
+    const pageName = 'cdaction';
 
     try {
-        console.log(`!!! STARTING CRAWLING PAGE ${name}`);
+        console.log(`!!! STARTING CRAWLING PAGE ${pageName}`);
         await page.goto(`${pageURL}/newsy-1.html`);
         await page.waitForSelector('#newsy');
-        let news = await page.evaluate(() => {
+        const news = await page.evaluate(() => {
             let newsResults = [];
             let newsOnPage = document.querySelectorAll('#newsy .news h3 a');
 
@@ -24,26 +24,20 @@ const text = require('./../src/helpers/text');
             return newsResults;
         });
 
-        let results = {
-            news: [],
-        };
-
         for (let i = 1; i < news.length - 1; i++) {
             await page.goto(pageURL + news[i]);
-            results.news.push(
-                {
-                    id: i.toString(),
-                    title: await text.singleSelectorReadText(page, '.lead'),
-                    text: await text.singleSelectorReadText(page, '.tresc'),
-                    link: pageURL + news[i]
-                });
+            let title = await textHelper.singleSelectorReadText(page, '#news_content h1');
+            let text = await textHelper.singleSelectorReadText(page, '.tresc');
+            let link = pageURL + news[i];
+
+            await databaseHelper.insertNewsToDatabase(title, text, link, pageName);
         }
-        await save.saveNews(name, results);
     } catch (e) {
      console.log(e);
     }
     finally {
-        console.log(`!!! FINISHED CRAWLING PAGE ${name}`);
+        console.log(`!!! FINISHED CRAWLING PAGE ${pageName}`);
+        await databaseHelper.endPool();
         browser.close();
     }
 })();

@@ -1,7 +1,7 @@
 const bro = require('../src/crawler/browser');
 const pageURL = 'https://mmorpg.org.pl';
-const save = require('./../src/helpers/save');
-const text = require('./../src/helpers/text');
+const textHelper = require('./../src/helpers/text');
+const databaseHelper = require('./../src/helpers/database');
 
 (async () => {
     const browser = await bro.browser();
@@ -18,13 +18,13 @@ const text = require('./../src/helpers/text');
             interceptedRequest.continue();
     });
 
-    const name = 'mmorpgorgpl';
+    const pageName = 'mmorpgorgpl';
 
     try {
-        console.log(`!!! STARTING CRAWLING PAGE ${name}`);
+        console.log(`!!! STARTING CRAWLING PAGE ${pageName}`);
         await page.goto(pageURL, {timeout: 120000});
         await page.waitForSelector('.content__left');
-        let news = await page.evaluate(() => {
+        const news = await page.evaluate(() => {
             let newsResults = [];
             let newsOnPage = document.querySelectorAll('.article-list__item--title a');
 
@@ -36,29 +36,21 @@ const text = require('./../src/helpers/text');
             return newsResults;
         });
 
-        let results = {
-            news: [],
-        };
-
         for (let i = 0; i < news.length - 1; i++) {
             await page.goto(pageURL + news[i], {timeout: 120000});
-            let title = await text.singleSelectorReadText(page, '.article__title');
-            let articleText = await text.multipleSelectorsReadText(page, '.article__text p');
-            if (text !== undefined && title !== undefined) {
-                results.news.push({
-                    id: i.toString(),
-                    title: title,
-                    text: articleText,
-                    link: pageURL + news[i]
-                });
+            let title = await textHelper.singleSelectorReadText(page, '.article__title');
+            let text = await textHelper.multipleSelectorsReadText(page, '.article__text p');
+            let link = pageURL + news[i];
+            if (title) {
+                await databaseHelper.insertNewsToDatabase(title, text, link, pageName);
             }
         }
-        await save.saveNews(name, results);
     } catch (e) {
         console.log(e);
     }
     finally {
-        console.log(`!!! FINISHED CRAWLING PAGE ${name}`);
+        console.log(`!!! FINISHED CRAWLING PAGE ${pageName}`);
+        await databaseHelper.endPool();
         browser.close();
     }
 })();

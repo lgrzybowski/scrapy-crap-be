@@ -1,8 +1,9 @@
-const fs = require('fs');
-
 'use strict';
-
+require('dotenv').config()
+const fs = require('fs');
 const Hapi = require('hapi');
+
+const databaseHelper = require('../../src/helpers/database');
 
 const server = Hapi.server({
     port: process.env.PORT || 8080,
@@ -13,12 +14,7 @@ server.route({
     method: 'GET',
     path: '/{siteName}',
     handler: (request, h) => {
-        const filePath = `./results/${request.params.siteName}.json`;
-
-        if (fs.existsSync(filePath)) {
-            return JSON.parse(fs.readFileSync(filePath, {encoding: 'utf-8'}));
-        }
-        return null;
+        return databaseHelper.getNewsFromToday(request.params.siteName)
     }
 });
 
