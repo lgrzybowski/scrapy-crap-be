@@ -22,7 +22,7 @@ const insertNewsToDatabase = async (title, text, link, pageName) => {
 
 const getNewsFromToday = async (pageName) => {
     const query = {
-        text: "SELECT * FROM pages WHERE pagename = $1 AND date <= now() AND date >= now() - interval '2 days'",
+        text: "SELECT * FROM pages WHERE pagename = $1 AND date <= now() AND date >= now() - interval '2 days' ORDER BY date DESC",
         values: [pageName.toString()]
     };
 
