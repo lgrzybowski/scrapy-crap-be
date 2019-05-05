@@ -29,7 +29,7 @@ function readFiles() {
     console.log('reading files');
     let pages = fs.readdirSync('./pages', 'utf8');
     const sites = pages.filter((element) => {
-        if(element !== 'crawl.js') {
+        if (element === 'go.js') {
             return element;
         }
     });
