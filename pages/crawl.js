@@ -1,4 +1,3 @@
-require('dotenv').config();
 const fs = require('fs');
 const exec = require('child_process').exec;
 const async = require('async');
@@ -27,7 +26,7 @@ function getResults(err, data) {
 
 function readFiles() {
     console.log('reading files');
-    let pages = fs.readdirSync('./pages', 'utf8');
+    const pages = fs.readdirSync('./pages', 'utf8');
     const sites = pages.filter((element) => {
         if (element === 'go.js') {
             return element;

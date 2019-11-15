@@ -1,3 +1,4 @@
+require('dotenv').config();
 const bro = require('../src/crawler/browser');
 const { pagesDefinition } = require('./pagesDefinition');
 const textHelper = require('./../src/helpers/text');

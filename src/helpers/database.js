@@ -14,9 +14,8 @@ const pool = new Pool({
 const insertNewsToDatabase = async (title, text, link, pageName) => {
     const query = {
         text: 'INSERT INTO pages(title, text, link, pagename, date) VALUES($1, $2, $3, $4, $5) ON CONFLICT (title) DO NOTHING',
-        values: [title, text, link, pageName, new Date()]
+        values: [title.trim(), text, link, pageName, new Date()]
     };
-
     await pool.query(query);
 };
 

@@ -13,7 +13,7 @@ const pagesDefinition =
         newsLink: '/archive/news',
         mainSelector: '.main',
         newsSelector: '.compact-archive-item h2.title a',
-        newsTitle: '.details',
+        newsTitle: '.title',
         newsContent: 'main section p',
     },{
         pageName: 'grampl',
