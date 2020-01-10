@@ -39,7 +39,7 @@ const databaseHelper = require('./../src/helpers/database');
                 return newsResults;
             }, pagesDefinition[pages].newsSelector);
 
-            for (let i = 1; i < news.length - 1; i++) {
+            for (let i = 0; i < news.length - 1; i++) {
                 await page.goto(pagesDefinition[pages].pageDomain + news[i]);
                 let title = await textHelper.singleSelectorReadText(page, pagesDefinition[pages].newsTitle);
                 let text = await textHelper.multipleSelectorsReadText(page, pagesDefinition[pages].newsContent);
@@ -56,5 +56,4 @@ const databaseHelper = require('./../src/helpers/database');
             browser.close();
         }
     }
-    await databaseHelper.endPool();
 })();

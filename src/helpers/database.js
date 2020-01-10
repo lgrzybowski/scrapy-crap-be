@@ -1,40 +1,56 @@
-const { Pool } = require('pg');
 
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    password: process.env.DB_PASSWORD,
-    port: 5432,
-    ssl: true,
-    sslfactory: 'org.postgresql.ssl.NonValidatingFactory',
-});
-
+const MongoClient = require('mongodb').MongoClient;
+const uri = "mongodb+srv://test:qw12qw12@cluster0-cnpfs.mongodb.net/test?retryWrites=true&w=majority";
 
 const insertNewsToDatabase = async (title, text, link, pageName) => {
-    const query = {
-        text: 'INSERT INTO pages(title, text, link, pagename, date) VALUES($1, $2, $3, $4, $5) ON CONFLICT (title) DO NOTHING',
-        values: [title.trim(), text, link, pageName, new Date()]
-    };
-    await pool.query(query);
+    const isNoArticleInDB = await getNewsBasedOnTitle(title);
+
+    if(isNoArticleInDB) {
+        const client = await MongoClient.connect(uri, {useNewUrlParser: true});
+        const db = client.db('crap');
+        await db.collection('crap').insertOne({title, text, link, pageName, date: new Date()});
+
+        await client.close();
+    }
+
+};
+
+const getNewsBasedOnTitle = async(title) =>{
+    const client = await MongoClient.connect(uri, { useNewUrlParser: true });
+    try {
+
+        const db = client.db('crap');
+        const news = await db.collection('crap').find({title}).toArray();
+
+        return news && Object.entries(news).length === 0;
+    }
+
+    finally {
+        await client.close();
+    }
 };
 
 const getNewsFromToday = async (pageName) => {
-    const query = {
-        text: "SELECT * FROM pages WHERE pagename = $1 AND date <= now() AND date >= now() - interval '2 days' ORDER BY date DESC",
-        values: [pageName.toString()]
-    };
+    const client = await MongoClient.connect(uri, { useNewUrlParser: true });
+    try {
+        const db = client.db('crap');
 
-    const news = await pool.query(query);
-    return news.rows;
-};
+        const start = new Date();
+        start.setHours(0,0,0,0);
 
-const endPool = async () =>{
-    await pool.end();
+        const end = new Date();
+        end.setHours(23,59,59,999);
+
+        const query = {pageName, date: { $gte: start, $lt: end }};
+        return await db.collection('crap').find(query).toArray();
+    }
+
+    finally {
+        await client.close();
+    }
 };
 
 module.exports = {
     insertNewsToDatabase,
     getNewsFromToday,
-    endPool,
 };
