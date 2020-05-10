@@ -1,3 +1,4 @@
+require('dotenv').config()
 const async = require('async')
 const rss = require('../rss/rss');
 

@@ -34,7 +34,7 @@ const RSS = [
     url: 'https://www.eurogamer.pl/?format=rss',
     newsTitle: 'h1.title',
     newsContentMainSelector: 'main section',
-    newsContent: 'main section p',
+    newsContent: 'p',
     remove: []
   },
   {
@@ -52,12 +52,12 @@ const RSS = [
     const feed = await parser.parseURL(rss.url)
 
     feed.items.forEach(async (rssResponse) => {
-      const response = await request({
+      const articleLink = await request({
         method: 'GET',
         uri: rssResponse.link
       })
 
-      const $ = cherio.load(response)
+      const $ = cherio.load(articleLink)
 
       rss.remove.forEach((removeSelector) => {
         $(removeSelector).remove()
