@@ -1,6 +1,7 @@
 require('dotenv').config()
-const async = require('async')
-const rss = require('../rss/rss');
+
+const rss = require('../rss/rss')
+const pagesDefinition = require('./pagesDefinition');
 
 (async () => {
   completeCrawling()
@@ -8,5 +9,5 @@ const rss = require('../rss/rss');
 })()
 
 function completeCrawling () {
-  async.series(rss)
+  Promise.all([pagesDefinition, rss])
 }

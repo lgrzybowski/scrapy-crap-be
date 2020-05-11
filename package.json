@@ -20,6 +20,7 @@
     "lint": "standard --fix"
   },
   "devDependencies": {
+    "eslint": "^7.0.0",
     "standard": "*"
   }
 }

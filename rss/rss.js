@@ -36,15 +36,15 @@ const RSS = [
     newsContentMainSelector: 'main section',
     newsContent: 'p',
     remove: []
-  },
-  {
-    name: 'grampl',
-    url: 'https://www.gram.pl/rss/content.xml',
-    newsTitle: 'article h1',
-    newsContentMainSelector: '#content-root',
-    newsContent: 'p',
-    remove: []
   }
+  // {
+  //   name: 'grampl',
+  //   url: 'https://www.gram.pl/rss/content.xml',
+  //   newsTitle: 'article h1',
+  //   newsContentMainSelector: '#content-root',
+  //   newsContent: 'p',
+  //   remove: []
+  // }
 ];
 
 (async () => {
@@ -52,19 +52,23 @@ const RSS = [
     const feed = await parser.parseURL(rss.url)
 
     feed.items.forEach(async (rssResponse) => {
-      const articleLink = await request({
-        method: 'GET',
-        uri: rssResponse.link
-      })
+      try {
+        const articleLink = await request({
+          method: 'GET',
+          uri: rssResponse.link
+        })
 
-      const $ = cherio.load(articleLink)
+        const $ = cherio.load(articleLink)
 
-      rss.remove.forEach((removeSelector) => {
-        $(removeSelector).remove()
-      })
+        rss.remove.forEach((removeSelector) => {
+          $(removeSelector).remove()
+        })
 
-      databaseHelper.insertNewsToDatabase($(rss.newsTitle).text().trim(),
-        $(rss.newsContentMainSelector).eq(0).find(rss.newsContent).text().trim(), rssResponse.link, rss.name)
+        await databaseHelper.insertNewsToDatabase($(rss.newsTitle).text().trim(),
+          $(rss.newsContentMainSelector).eq(0).find(rss.newsContent).text().trim(), rssResponse.link, rss.name)
+      } catch (error) {
+        console.log(error)
+      }
     })
   })
 })()

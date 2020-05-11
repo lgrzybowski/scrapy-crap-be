@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb')
-const uri = `mongodb+srv://${process.env.DATABASE}:${process.env.PASSWORD}@cluster0-cnpfs.mongodb.net/test?retryWrites=true&w=majority`
+const uri = `mongodb+srv://${process.env.DATABASE}:${process.env.PASSWORD}@cluster0-vv3n4.mongodb.net/test?retryWrites=true&w=majority`
 
-const connectToMongo =  async () => {
+const connectToMongo = async () => {
   return await MongoClient.connect(uri, { useNewUrlParser: true })
 }
 
@@ -9,28 +9,36 @@ const insertNewsToDatabase = async (title, text, link, pageName) => {
   const isNoArticleInDB = await getNewsBasedOnTitle(title)
 
   if (isNoArticleInDB) {
-    const client = await connectToMongo();
-    const db = client.db('crap')
-    await db.collection('crap').insertOne({ title, text, link, pageName, date: new Date() })
+    const client = await connectToMongo()
 
-    await client.close()
+    try {
+      console.log(`adding new link from page ${pageName}`)
+      const db = client.db('crap')
+      await db.collection('crap').insertOne({ title, text, link, pageName, date: new Date() })
+    } catch (e) {
+      console.log(e)
+    } finally {
+      await client.close()
+    }
   }
 }
 
 const getNewsBasedOnTitle = async (title) => {
-  const client = await connectToMongo();
+  const client = await connectToMongo()
   try {
     const db = client.db('crap')
     const news = await db.collection('crap').find({ title }).toArray()
 
     return news && Object.entries(news).length === 0
+  } catch (e) {
+    console.log(e)
   } finally {
     await client.close()
   }
 }
 
 const getNewsFromToday = async (pageName) => {
-  const client = await connectToMongo();
+  const client = await connectToMongo()
   try {
     const db = client.db('crap')
 
@@ -42,6 +50,8 @@ const getNewsFromToday = async (pageName) => {
 
     const query = { pageName, date: { $gte: date, $lt: end } }
     return await db.collection('crap').find(query).sort({ date: -1 }).toArray()
+  } catch (e) {
+    console.log(e)
   } finally {
     await client.close()
   }

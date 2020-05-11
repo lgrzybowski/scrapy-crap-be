@@ -1,30 +1,47 @@
+require('dotenv').config()
+const request = require('request-promise-native')
+const cherio = require('cheerio')
+const databaseHelper = require('./../src/helpers/database')
+
 const pagesDefinition =
     [{
-      pageName: 'cdaction',
-      pageDomain: 'https://www.cdaction.pl',
-      newsLink: '/newsy-1.html',
-      mainSelector: '#newsy',
-      newsSelector: '#newsy .news h3 a',
-      newsTitle: '#news_content h1',
-      newsContent: '#intertext1'
-    }, {
-      pageName: 'gryonline',
-      pageDomain: 'https://www.gry-online.pl',
-      newsLink: '/newsroom.asp',
-      mainSelector: '.lista-news',
-      newsSelector: '.lista-news .box a:not(.pic-c)',
-      newsTitle: '.word-txt h1',
-      newsContent: '.word-txt p'
-    }, {
-      pageName: 'mmorpgorgpl',
+      name: 'mmorpgorgpl',
       pageDomain: 'https://mmorpg.org.pl',
-      newsLink: '',
-      mainSelector: '.content__left',
-      newsSelector: '.article-list__item--title a',
+      newsLink: '.content .article-list__item--title a',
       newsTitle: '.article__title h2',
-      newsContent: '.article__text p'
-    }]
+      newsContentMainSelector: '.article__text p',
+      newsContent: '',
+      remove: []
+    }];
 
-module.exports = {
-  pagesDefinition
+(async () => {
+  pagesDefinition.forEach(async (page) => {
+    let newsLinks = []
+    const mainPage = await request({
+      method: 'GET',
+      uri: page.pageDomain
+    })
+
+    const $ = cherio.load(mainPage)
+    const links = $(page.newsLink)
+
+    links.each((link, value) => {
+      newsLinks.push($(value).attr('href'))
+    })
+    readNewsContent(page.pageDomain, newsLinks)
+    newsLinks = []
+  })
+})()
+
+const readNewsContent = function (domain, links) {
+  links.forEach(async (link) => {
+    const newsPage = await request({
+      method: 'GET',
+      uri: domain + link
+    })
+    const $ = cherio.load(newsPage)
+
+    await databaseHelper.insertNewsToDatabase($('.article__title h2').text().trim(),
+      $('.article__text').text().trim(), domain + link, 'mmorpgorgpl')
+  })
 }
