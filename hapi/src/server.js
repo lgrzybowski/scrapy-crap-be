@@ -17,6 +17,14 @@ server.route({
   }
 })
 
+server.route({
+  method: 'GET',
+  path: '/',
+  handler: (h) => {
+    return databaseHelper.getAllSites()
+  }
+})
+
 const init = async () => {
   await server.start()
   console.log(`Server running at: ${server.info.uri}`)

@@ -57,7 +57,21 @@ const getNewsFromToday = async (pageName) => {
   }
 }
 
+const getAllSites = async () => {
+  const client = await connectToMongo()
+  try {
+    const db = client.db('crap')
+    return await db.collection('crap').distinct("pageName")
+
+  } catch (e) {
+    console.log(e)
+  } finally {
+    await client.close()
+  }
+}
+
 module.exports = {
   insertNewsToDatabase,
-  getNewsFromToday
+  getNewsFromToday,
+  getAllSites
 }
