@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "async": "^2.6.3",
+    "async": "^3.2.2",
     "cheerio": "^1.0.0-rc.3",
     "dotenv": "^8.0.0",
     "hapi": "17.5.4",
